@@ -113,7 +113,7 @@ public class UserService {
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         return user.getId().equals(id);
     }
- 
+
     @Transactional
     public void updateStats(User user, ReportStatus reportStatus) {
         if (reportStatus.equals(ReportStatus.COMPLETED)) {
