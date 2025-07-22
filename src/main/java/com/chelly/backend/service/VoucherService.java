@@ -25,7 +25,24 @@ public class VoucherService {
     private final UserRepository userRepository;
 
     public List<Voucher> getAllVouchers() {
-        return voucherRepository.findAll();
+        User currentUser = getCurrentUser();
+        if (currentUser == null) {
+            return voucherRepository.findAll();
+        }
+
+        return voucherRepository.findVouchersNotRedeemedByUser(currentUser.getId());
+    }
+
+    private User getCurrentUser() {
+        try {
+            Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            if (principal instanceof User) {
+                return (User) principal;
+            }
+            return null;
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     public Voucher getVoucherById(int id) {

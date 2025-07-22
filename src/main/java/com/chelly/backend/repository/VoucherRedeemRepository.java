@@ -9,4 +9,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface VoucherRedeemRepository extends JpaRepository<VoucherRedeem, Integer> {
     Boolean existsByUserAndVoucher(User user, Voucher voucher);
+
+
 }

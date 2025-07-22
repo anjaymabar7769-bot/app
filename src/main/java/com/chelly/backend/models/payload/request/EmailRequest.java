@@ -1,5 +1,6 @@
 package com.chelly.backend.models.payload.request;
 
+
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -12,15 +13,10 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class LoginRequest {
+public class EmailRequest {
     @Email(message = "Format email tidak valid")
     @NotBlank(message = "Email tidak boleh kosong")
     @Size(min = 5, message = "Email minimal 5 karakter")
     @Size(max = 100, message = "Email maksimal 100 karakter")
     private String email;
-
-    @NotBlank(message = "Password tidak boleh kosong")
-    @Size(min = 6, message = "Password minimal 6 karakter")
-    @Size(max = 100, message = "Password maksimal 100 karakter")
-    private String password;
 }

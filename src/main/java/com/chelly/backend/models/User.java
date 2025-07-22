@@ -65,6 +65,8 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private LocalDateTime birthdate;
 
+    private Boolean canChangePassword = false;
+
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "user_role", joinColumns = @JoinColumn(name = "role_id", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "user_id"))
     @JsonManagedReference
@@ -85,7 +87,7 @@ public class User implements UserDetails {
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return roles.stream().map(
-                role -> new SimpleGrantedAuthority("ROLE_" + role.getName()))
+                        role -> new SimpleGrantedAuthority("ROLE_" + role.getName()))
                 .toList();
     }
 

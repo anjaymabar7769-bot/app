@@ -18,19 +18,11 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class UpdateProfileRequest {
-    @Email(message = "Format email tidak valid")
-    @NotBlank(message = "Email tidak boleh kosong")
-    @Size(min = 5, message = "Email minimal 5 karakter")
-    @Size(max = 25, message = "Email maksimal 25 karakter")
-    private String email;
-
     @NotBlank(message = "Username tidak boleh kosong")
     @Size(min = 5, message = "Username minimal 5 karakter")
     @Size(max = 25, message = "Username maksimal 25 karakter")
     private String username;
-
-    @Past(message = "Tanggal lahir harus di masa lalu")
-    private LocalDateTime birthDate;
-
+    private String fullName;
+    private String phoneNumber;
     private MultipartFile profilePicture;
 }

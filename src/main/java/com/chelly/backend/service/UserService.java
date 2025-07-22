@@ -1,17 +1,11 @@
 package com.chelly.backend.service;
 
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Map;
-
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.stereotype.Service;
-
 import com.chelly.backend.models.Report;
 import com.chelly.backend.models.ReportSearchCriteria;
 import com.chelly.backend.models.User;
 import com.chelly.backend.models.enums.ReportStatus;
 import com.chelly.backend.models.exceptions.ResourceNotFoundException;
+import com.chelly.backend.models.payload.request.UpdatePasswordRequest;
 import com.chelly.backend.models.payload.request.UpdateProfileRequest;
 import com.chelly.backend.models.payload.response.ReportStats;
 import com.chelly.backend.models.payload.response.UserResponse;
@@ -19,18 +13,25 @@ import com.chelly.backend.models.payload.response.UserStats;
 import com.chelly.backend.models.specifications.ReportSpecification;
 import com.chelly.backend.repository.ReportRepository;
 import com.chelly.backend.repository.UserRepository;
-
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @Service
 @AllArgsConstructor
 public class UserService {
     private final UserRepository userRepository;
-    private final CloudinaryService cloudinaryService;
     private final ReportRepository reportRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final FileStorageService fileStorageService;
 
     private static final Map<Integer, Integer> LEVEL_THRESHOLDS;
 
@@ -94,13 +95,13 @@ public class UserService {
                 () -> new ResourceNotFoundException("User tidak ditemukan"));
 
         if (updateProfileRequest.getProfilePicture() != null) {
-            user.setProfilePicture(cloudinaryService.uploadImage(updateProfileRequest.getProfilePicture()));
+            user.setProfilePicture(fileStorageService.storeFile(updateProfileRequest.getProfilePicture()));
         }
 
         // user.setId(id);
-        user.setEmail(updateProfileRequest.getEmail());
         user.setUsername(updateProfileRequest.getUsername());
-        user.setBirthdate(updateProfileRequest.getBirthDate());
+        user.setFullName(updateProfileRequest.getFullName());
+        user.setPhoneNumber(updateProfileRequest.getPhoneNumber());
 
         return userRepository.save(user);
     }

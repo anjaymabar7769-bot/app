@@ -87,6 +87,7 @@ public class UserController {
         );
     }
 
+
     @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("@userService.canModifyProfile(#id)")
     @Operation(summary = "Perbarui Profil Pengguna", description = "Memperbarui data profil pengguna yang sedang login")

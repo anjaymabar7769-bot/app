@@ -15,7 +15,7 @@ public interface UserRepository extends JpaRepository<User, Integer> {
 
     boolean existsByEmail(String email);
 
-    @Query("SELECT user FROM User user ORDER BY user.points DESC limit 100")
+    @Query("SELECT DISTINCT u FROM User u JOIN u.roles r WHERE r.name = 'USER' ORDER BY u.points DESC")
     List<User> findTopUsersForLeaderboard();
 
 

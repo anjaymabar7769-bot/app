@@ -26,7 +26,7 @@ public class ReportService {
     private final ReportRepository reportRepository;
     private final ReportTimelineRepository reportTimelineRepository;
     private final UserService userService;
-    private final CloudinaryService cloudinaryService;
+    private final FileStorageService fileStorageService;
 
     public List<Report> findAll() {
         return reportRepository.findAll();
@@ -44,7 +44,7 @@ public class ReportService {
     public Report createReport(ReportRequest reportRequest) {
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-        String imageUrl = cloudinaryService.uploadImage(reportRequest.getImage());
+        String imageUrl = fileStorageService.storeFile(reportRequest.getImage());
 
         Report report = Report.builder()
                 .reportCategory(ReportCategory.valueOf(reportRequest.getReportCategory()))
