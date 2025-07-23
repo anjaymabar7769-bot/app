@@ -1,6 +1,5 @@
 package com.chelly.backend.models.payload.response;
 
-import com.chelly.backend.models.Image;
 import com.chelly.backend.models.Role;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

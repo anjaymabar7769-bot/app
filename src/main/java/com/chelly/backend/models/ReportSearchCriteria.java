@@ -1,24 +1,25 @@
 package com.chelly.backend.models;
 
-import com.chelly.backend.models.enums.ReportCategory;
-import com.chelly.backend.models.enums.ReportStatus;
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import jakarta.persistence.Column;
-import lombok.Data;
+import java.time.LocalDateTime;
+import java.util.Date;
+
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.format.annotation.DateTimeFormat;
 
-import java.time.LocalDateTime;
-import java.util.Date;
+import com.chelly.backend.models.enums.ReportStatus;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import jakarta.persistence.Column;
+import lombok.Data;
 
 @Data
 public class ReportSearchCriteria {
 
     private String keyword;
 
-    private ReportCategory reportCategory;
+    private String reportCategory;
 
     private ReportStatus reportStatus;
 

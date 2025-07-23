@@ -1,5 +1,14 @@
 package com.chelly.backend.service;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+
 import com.chelly.backend.models.Role;
 import com.chelly.backend.models.User;
 import com.chelly.backend.models.UserSession;
@@ -11,15 +20,8 @@ import com.chelly.backend.models.payload.request.RegisterRequest;
 import com.chelly.backend.models.payload.request.UpdatePasswordRequest;
 import com.chelly.backend.repository.RoleRepository;
 import com.chelly.backend.repository.UserRepository;
-import lombok.AllArgsConstructor;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
+import lombok.AllArgsConstructor;
 
 @Service
 @AllArgsConstructor
@@ -53,7 +55,7 @@ public class AuthService {
                 .canChangePassword(false)
                 .roles(roles)
                 .level(1)
-                .points(90)
+                .points(0)
                 .build());
     }
 
@@ -79,8 +81,7 @@ public class AuthService {
 
     public User updatePassword(UpdatePasswordRequest updatePasswordRequest) {
         User user = userRepository.findByEmail(updatePasswordRequest.getEmail()).orElseThrow(
-                () -> new ResourceNotFoundException("User tidak ditemukan")
-        );
+                () -> new ResourceNotFoundException("User tidak ditemukan"));
         if (!user.getCanChangePassword()) {
             throw new ResourceNotFoundException("Can't change password");
         }

@@ -83,7 +83,7 @@ public class UserController {
         return ResponseHandler.buildSuccessResponse(
                 HttpStatus.OK,
                 "Berhasil mengambil riwayat laporan pengguna",
-                userService.getUserReportHistory()
+                userService.findAllByCurrentUser()
         );
     }
 

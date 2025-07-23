@@ -1,7 +1,6 @@
 package com.chelly.backend.models.payload.request;
 
 import com.chelly.backend.models.annotations.EnumValue;
-import com.chelly.backend.models.enums.ReportCategory;
 import com.chelly.backend.models.enums.ReportStatus;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;

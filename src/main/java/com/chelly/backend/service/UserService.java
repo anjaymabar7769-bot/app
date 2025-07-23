@@ -1,11 +1,18 @@
 package com.chelly.backend.service;
 
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+
 import com.chelly.backend.models.Report;
 import com.chelly.backend.models.ReportSearchCriteria;
 import com.chelly.backend.models.User;
 import com.chelly.backend.models.enums.ReportStatus;
 import com.chelly.backend.models.exceptions.ResourceNotFoundException;
-import com.chelly.backend.models.payload.request.UpdatePasswordRequest;
 import com.chelly.backend.models.payload.request.UpdateProfileRequest;
 import com.chelly.backend.models.payload.response.ReportStats;
 import com.chelly.backend.models.payload.response.UserResponse;
@@ -13,16 +20,10 @@ import com.chelly.backend.models.payload.response.UserStats;
 import com.chelly.backend.models.specifications.ReportSpecification;
 import com.chelly.backend.repository.ReportRepository;
 import com.chelly.backend.repository.UserRepository;
+
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
-
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Map;
 
 @Slf4j
 @Service
@@ -37,11 +38,12 @@ public class UserService {
 
     static {
         LEVEL_THRESHOLDS = Map.of(
-                1, 100,
-                2, 200,
-                3, 400,
-                4, 700,
-                5, 1000);
+                1, 0,
+                2, 100,
+                3, 200,
+                4, 400,
+                5, 700,
+                6, 1000);
     }
 
     public ReportStats getUserReportStats() {
@@ -54,6 +56,11 @@ public class UserService {
         criteria.setUserId(user.getId());
 
         return reportRepository.findAll(ReportSpecification.getSpecification(criteria));
+    }
+
+    public List<Report> findAllByCurrentUser() {
+        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        return reportRepository.findAllByUser(user);
     }
 
     public List<Report> getUserReportHistory() {
@@ -117,23 +124,15 @@ public class UserService {
 
     @Transactional
     public void updateStats(User user, ReportStatus reportStatus) {
-        if (reportStatus.equals(ReportStatus.COMPLETED)) {
-            user.setPoints(user.getPoints() + 15);
-            checkAndUpdateUserLevel(user);
-            userRepository.save(user);
+        int pointsToAdd = 0;
+        if (reportStatus == ReportStatus.COMPLETED) {
+            pointsToAdd = 15;
         }
-    }
+        user.setPoints(user.getPoints() + pointsToAdd);
 
-    private Integer getRequiredPointsPercentage(User user) {
-        Integer threshold = LEVEL_THRESHOLDS.get(user.getLevel());
-        if (threshold == null || threshold == 0)
-            return 100;
-        return Math.min(100, (user.getPoints() * 100) / threshold);
-    }
+        checkAndUpdateUserLevel(user);
 
-    private Integer getRequiredPoints(User user) {
-        Integer currentLevel = user.getLevel();
-        return Math.max(0, LEVEL_THRESHOLDS.get(currentLevel) - user.getPoints());
+        userRepository.save(user);
     }
 
     private void checkAndUpdateUserLevel(User user) {
@@ -141,10 +140,80 @@ public class UserService {
         int currentPoints = user.getPoints();
         int nextLevel = currentLevel + 1;
 
+        log.info("--- Checking Level Up for User: {} ---", user.getUsername());
+        log.info("Current Level: {}", currentLevel);
+        log.info("Current Points (after addition): {}", currentPoints);
+        log.info("Next Level to check: {}", nextLevel);
+
+        boolean leveledUp = false;
         while (LEVEL_THRESHOLDS.containsKey(nextLevel) && currentPoints >= LEVEL_THRESHOLDS.get(nextLevel)) {
+            log.info("Threshold for Level {}: {}", nextLevel, LEVEL_THRESHOLDS.get(nextLevel));
             user.setLevel(nextLevel);
-            System.out.println("User " + user.getUsername() + " leveled up to " + nextLevel + "!");
-            nextLevel++;
+            log.info("User {} LEVELED UP to Level {}!", user.getUsername(), nextLevel);
+            leveledUp = true;
+            nextLevel++; // Lanjut cek level berikutnya
         }
+
+        if (!leveledUp) {
+            log.info("User {} did not level up. Still at Level {} (Points: {}). Next level ({}) requires {} points.",
+                    user.getUsername(), currentLevel, currentPoints, nextLevel,
+                    LEVEL_THRESHOLDS.getOrDefault(nextLevel, 0));
+        }
+        log.info("--- End Level Up Check ---");
     }
+
+    public Integer getRequiredPoints(User user) {
+        int currentLevel = user.getLevel();
+        int currentPoints = user.getPoints();
+
+        // Cek level berikutnya
+        int nextLevel = currentLevel + 1;
+        Integer nextLevelThreshold = LEVEL_THRESHOLDS.get(nextLevel); // Ambil threshold untuk level selanjutnya
+
+        if (nextLevelThreshold == null) {
+            // User sudah di level maksimal atau tidak ada level selanjutnya yang
+            // didefinisikan
+            return 0; // Tidak ada poin yang dibutuhkan lagi
+        }
+
+        int required = nextLevelThreshold - currentPoints;
+        return Math.max(required, 0); // Pastikan tidak negatif
+    }
+
+    public Integer getRequiredPointsPercentage(User user) {
+        int currentLevel = user.getLevel();
+        int currentPoints = user.getPoints();
+
+        // Cek level berikutnya
+        int nextLevel = currentLevel + 1;
+        Integer nextLevelThreshold = LEVEL_THRESHOLDS.get(nextLevel);
+
+        // Ambil threshold untuk level saat ini (untuk menghitung basis persentase)
+        // Jika user di level 1 (threshold 0), maka targetnya adalah threshold level 2
+        // (100)
+        Integer currentLevelStartThreshold = LEVEL_THRESHOLDS.getOrDefault(currentLevel, 0);
+
+        if (nextLevelThreshold == null || currentLevelStartThreshold == nextLevelThreshold) {
+            // User sudah di level maksimal atau tidak ada progres selanjutnya yang bisa
+            // dihitung
+            return 100;
+        }
+
+        // Hitung poin yang sudah didapat DI ATAS ambang batas level saat ini
+        // Misalnya, di Level 2 (start 100 poin), user punya 105 poin. Dia sudah 5 poin
+        // di atas ambang batas Level 2.
+        int pointsEarnedInCurrentLevelSegment = currentPoints - currentLevelStartThreshold;
+
+        // Hitung total poin yang dibutuhkan untuk segmen level ini (misal dari 100 ke
+        // 200 = 100 poin)
+        int pointsNeededForNextLevelSegment = nextLevelThreshold - currentLevelStartThreshold;
+
+        if (pointsNeededForNextLevelSegment <= 0) {
+            return 100; // Hindari pembagian nol atau negatif
+        }
+
+        int percentage = (int) (((double) pointsEarnedInCurrentLevelSegment / pointsNeededForNextLevelSegment) * 100);
+        return Math.min(percentage, 100); // Pastikan tidak lebih dari 100%
+    }
+
 }

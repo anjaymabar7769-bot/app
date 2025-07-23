@@ -1,6 +1,7 @@
 package com.chelly.backend.repository;
 
 import com.chelly.backend.models.Report;
+import com.chelly.backend.models.User;
 import com.chelly.backend.models.enums.ReportStatus;
 import com.chelly.backend.models.payload.response.ReportStats;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -33,4 +34,7 @@ public interface ReportRepository extends JpaRepository<Report, Integer>, JpaSpe
             @Param("status") ReportStatus status,
             @Param("userId") Integer userId
     );
+
+    List<Report> findAllByOrderByCreatedAtDesc();
+    List<Report> findAllByUser(User user);
 }
