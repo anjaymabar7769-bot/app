@@ -1,14 +1,5 @@
 package com.chelly.backend.service;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
-
 import com.chelly.backend.models.Role;
 import com.chelly.backend.models.User;
 import com.chelly.backend.models.UserSession;
@@ -20,17 +11,24 @@ import com.chelly.backend.models.payload.request.RegisterRequest;
 import com.chelly.backend.models.payload.request.UpdatePasswordRequest;
 import com.chelly.backend.repository.RoleRepository;
 import com.chelly.backend.repository.UserRepository;
-
 import lombok.AllArgsConstructor;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @AllArgsConstructor
 public class AuthService {
     private UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
     private final SessionService sessionService;
-    private final AuthenticationManager authenticationManager;
     private final RoleRepository roleRepository;
+    private final UserDetailsService userDetailsService;
 
     public User register(RegisterRequest registerRequest) {
         if (userRepository.existsByEmail(registerRequest.getEmail())) {
@@ -50,7 +48,7 @@ public class AuthService {
         return userRepository.save(User.builder()
                 .username(registerRequest.getUsername())
                 .email(registerRequest.getEmail())
-                .password(passwordEncoder.encode(registerRequest.getPassword()))
+                .password(registerRequest.getPassword())
                 .birthdate(registerRequest.getBirthDate())
                 .canChangePassword(false)
                 .roles(roles)
@@ -63,13 +61,13 @@ public class AuthService {
         User user = userRepository.findByEmail(loginRequest.getEmail()).orElseThrow(
                 () -> new ResourceNotFoundException("Email tidak ditemukan."));
 
-        if (!passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {
+        if (!loginRequest.getPassword().equals(user.getPassword())) {
             throw new AuthException("Email atau password salah");
         }
 
-        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
-                loginRequest.getEmail(),
-                loginRequest.getPassword()));
+        UserDetails userDetails = userDetailsService.loadUserByUsername(user.getEmail());
+        Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, userDetails.getPassword(), userDetails.getAuthorities());
+        SecurityContextHolder.getContext().setAuthentication(authentication);
 
         return sessionService.createSession(user);
     }
@@ -85,7 +83,7 @@ public class AuthService {
         if (!user.getCanChangePassword()) {
             throw new ResourceNotFoundException("Can't change password");
         }
-        user.setPassword(passwordEncoder.encode(updatePasswordRequest.getPassword()));
+        user.setPassword(updatePasswordRequest.getPassword());
         user.setCanChangePassword(false);
         return userRepository.save(user);
     }

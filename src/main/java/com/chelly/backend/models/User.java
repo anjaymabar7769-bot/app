@@ -40,7 +40,7 @@ public class User implements UserDetails {
     @Column(unique = true, nullable = false, length = 100)
     private String email;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 15)
     @JsonIgnore
     private String password;
 
@@ -57,6 +57,7 @@ public class User implements UserDetails {
     private Integer level = 1;
     private Integer points = 0;
 
+    @Column(length = 100)
     private String profilePicture;
 
     private Integer currentStreak = 0;

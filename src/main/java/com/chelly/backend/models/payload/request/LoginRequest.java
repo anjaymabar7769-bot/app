@@ -21,6 +21,6 @@ public class LoginRequest {
 
     @NotBlank(message = "Password tidak boleh kosong")
     @Size(min = 6, message = "Password minimal 6 karakter")
-    @Size(max = 100, message = "Password maksimal 100 karakter")
+    @Size(max = 15, message = "Password maksimal 15 karakter")
     private String password;
 }

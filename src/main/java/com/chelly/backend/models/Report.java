@@ -57,7 +57,7 @@ public class Report {
     @JsonManagedReference
     private List<ReportTimeline> reportTimelines;
 
-    @Column(nullable = false)
+    @Column(nullable = false , length = 100)
     private String image;
 
     @CreationTimestamp

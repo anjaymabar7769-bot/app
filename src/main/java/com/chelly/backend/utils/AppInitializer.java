@@ -10,8 +10,14 @@ import com.chelly.backend.repository.VoucherRepository;
 import com.chelly.backend.service.AuthService;
 import lombok.AllArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -23,13 +29,58 @@ public class AppInitializer implements CommandLineRunner {
     private final AuthService authService;
     private final VoucherRepository voucherRepository;
     private final CategoryRepository categoryRepository;
+    private final JdbcTemplate jdbcTemplate;
 
     @Override
     public void run(String... args) {
-        initializeRoles();
-        initUser();
-        initVouchers();
-        initializeCategory();
+        exportAllTablesToCsv("src/main/resources/exports");
+//        initializeRoles();
+//        initUser();
+//        initVouchers();
+//        initializeCategory();
+    }
+
+    public void exportAllTablesToCsv(String outputDir) {
+        List<String> tables = jdbcTemplate.queryForList("SELECT table_name FROM user_tables", String.class);
+
+        for (String table : tables) {
+            exportTableToCsv(table, outputDir);
+        }
+    }
+
+    private void exportTableToCsv(String tableName, String outputDir) {
+        List<String> columns = jdbcTemplate.queryForList(
+                "SELECT column_name FROM user_tab_columns WHERE table_name = ?",
+                String.class,
+                tableName.toUpperCase());
+
+        String sql = "SELECT * FROM " + tableName;
+
+        Path filePath = Paths.get(outputDir, tableName + ".csv");
+
+        try (PrintWriter writer = new PrintWriter(Files.newBufferedWriter(filePath))) {
+            writer.println(String.join(",", columns));
+
+            jdbcTemplate.query(sql, rs -> {
+                do {
+                    List<String> row = new ArrayList<>();
+                    for (String col : columns) {
+                        row.add(sanitize(rs.getString(col)));
+                    }
+                    writer.println(String.join(",", row));
+                } while (rs.next());
+            });
+
+            System.out.println("Exported table: " + tableName);
+
+        } catch (IOException e) {
+            System.err.println("Gagal export table " + tableName + ": " + e.getMessage());
+        }
+    }
+
+    private String sanitize(String value) {
+        if (value == null) return "";
+        return value.replace(",", " ");
     }
 
     void initializeCategory() {
