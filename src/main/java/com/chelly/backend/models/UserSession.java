@@ -26,9 +26,10 @@ public class UserSession {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "user_session_generator")
     @SequenceGenerator(name = "user_session_generator", sequenceName = "session_id_seq", allocationSize = 1)
+    @Column(length = 10)
     private Integer id;
 
-    @Column(unique = true, nullable = false)
+    @Column(unique = true, nullable = false , length = 50)
     private String token;
 
     @OneToOne(fetch = FetchType.EAGER)

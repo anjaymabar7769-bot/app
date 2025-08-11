@@ -28,6 +28,7 @@ public class ReportTimeline {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "report_timeline_generator")
     @SequenceGenerator(name = "report_timeline_generator", sequenceName = "report_timeline_id_seq", allocationSize = 1)
+    @Column(length = 10)
     private Integer id;
 
     @Enumerated(EnumType.STRING)

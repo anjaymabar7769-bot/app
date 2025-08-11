@@ -33,11 +33,11 @@ public class AppInitializer implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        exportAllTablesToCsv("src/main/resources/exports");
-//        initializeRoles();
-//        initUser();
-//        initVouchers();
-//        initializeCategory();
+        initializeRoles();
+        initUser();
+        initVouchers();
+        initializeCategory();
+//        exportAllTablesToCsv("src/main/resources/exports");
     }
 
     public void exportAllTablesToCsv(String outputDir) {

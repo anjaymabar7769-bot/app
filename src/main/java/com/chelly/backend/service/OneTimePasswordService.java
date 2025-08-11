@@ -28,7 +28,7 @@ public class OneTimePasswordService {
 
     public OneTimePassword generateOneTimePassword(String email) {
         User user = userRepository.findByEmail(email).orElseThrow(
-                () -> new ResourceNotFoundException("User was not found")
+                () -> new ResourceNotFoundException("Email tidak terdaftar.")
         );
 
         List<OneTimePassword> activeOtps = oneTimePasswordRepository.findAllByUserAndAvailableTrue(user);
@@ -50,7 +50,7 @@ public class OneTimePasswordService {
 
     public OneTimePassword findByCode(String code) {
         return oneTimePasswordRepository.findByCode(code).orElseThrow(
-                () -> new ResourceNotFoundException("One time password was not found.")
+                () -> new ResourceNotFoundException("Kode verifikasi tidak valid.")
         );
     }
 
@@ -63,13 +63,13 @@ public class OneTimePasswordService {
         OneTimePassword oneTimePassword = findByCode(oneTimePasswordRequest.getCode());
 
         if (!oneTimePassword.isAvailable()) {
-            throw new RuntimeException("One time password already used.");
+            throw new RuntimeException("Kode verifikasi tidak valid.");
         }
 
         if (Instant.now().isAfter(oneTimePassword.getExpiredAt())) {
             oneTimePassword.setAvailable(false);
             oneTimePasswordRepository.save(oneTimePassword);
-            throw new RuntimeException("One time password has already expired.");
+            throw new RuntimeException("Kode verifikasi tidak valid.");
         }
 
 //        if (!passwordEncoder.matches(oneTimePassword.getCode(), oneTimePasswordRequest.getCode())) {

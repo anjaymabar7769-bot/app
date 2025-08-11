@@ -29,6 +29,7 @@ public class Report {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "report_generator")
     @SequenceGenerator(name = "report_generator", sequenceName = "report_id_seq", allocationSize = 1)
+    @Column(length = 10)
     private Integer id;
 
     @ManyToOne(fetch = FetchType.EAGER)
@@ -39,10 +40,10 @@ public class Report {
     @JoinColumn(name = "user_id", referencedColumnName = "id", nullable = false)
     private User user;
 
-    @Column(nullable = false, length = 2000)
+    @Column(nullable = false, length = 200)
     private String description;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 100)
     private String location;
 
     @Column(nullable = false)
@@ -57,7 +58,7 @@ public class Report {
     @JsonManagedReference
     private List<ReportTimeline> reportTimelines;
 
-    @Column(nullable = false , length = 100)
+    @Column(nullable = false, length = 100)
     private String image;
 
     @CreationTimestamp

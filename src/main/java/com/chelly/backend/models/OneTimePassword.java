@@ -25,9 +25,10 @@ public class OneTimePassword {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "otp_generator")
     @SequenceGenerator(name = "otp_generator", sequenceName = "otp_id_seq", allocationSize = 1)
+    @Column(length = 10)
     private Integer id;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false, unique = true , length = 6)
     private String code;
 
     @ManyToOne

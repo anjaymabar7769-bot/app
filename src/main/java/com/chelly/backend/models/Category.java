@@ -33,9 +33,10 @@ public class Category {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "category_generator")
     @SequenceGenerator(name = "category_generator", sequenceName = "category_id_seq", allocationSize = 1)
+    @Column(length = 10)
     private Integer id;
 
-    @Column(nullable = false)
+    @Column(nullable = false , length = 40)
     private String name;
 
     @CreationTimestamp

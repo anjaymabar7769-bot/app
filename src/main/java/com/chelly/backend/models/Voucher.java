@@ -25,12 +25,13 @@ public class Voucher {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "voucher_id_generator")
     @SequenceGenerator(name = "voucher_id_generator", sequenceName = "voucher_id_seq", allocationSize = 1)
+    @Column(length = 10)
     private Integer id;
 
-    @Column(nullable = false)
+    @Column(nullable = false , length = 50)
     private String title;
 
-    @Column(nullable = false)
+    @Column(nullable = false , length = 100)
     private String description;
 
     @Column(nullable = false)

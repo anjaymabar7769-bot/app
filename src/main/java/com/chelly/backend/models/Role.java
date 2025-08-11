@@ -25,9 +25,10 @@ public class Role {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "user_role_generator")
     @SequenceGenerator(name = "user_role_generator", sequenceName = "role_id_seq", allocationSize = 1)
+    @Column(length = 10)
     private Integer id;
 
-    @Column(unique = true, nullable = false)
+    @Column(unique = true, nullable = false , length = 25)
     private String name;
 
     @CreationTimestamp

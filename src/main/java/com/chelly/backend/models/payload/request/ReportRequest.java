@@ -19,11 +19,11 @@ public class ReportRequest {
     private Integer categoryId;
 
     @NotBlank(message = "Deskripsi laporan tidak boleh kosong")
-    @Size(min = 10, max = 2000, message = "Deskripsi laporan harus antara 10 sampai 2000 karakter")
+    @Size(min = 10, max = 200, message = "Deskripsi laporan harus antara 10 sampai 200 karakter")
     private String description;
 
     @NotBlank(message = "Alamat laporan tidak boleh kosong")
-    @Size(min = 5, max = 500, message = "Alamat laporan harus antara 5 sampai 500 karakter")
+    @Size(min = 5, max = 100, message = "Alamat laporan harus antara 5 sampai 100 karakter")
     private String location;
 
     // @PastOrPresent(message = "Tanggal dan waktu laporan tidak boleh di m asa

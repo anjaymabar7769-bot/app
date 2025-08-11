@@ -32,12 +32,13 @@ public class User implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "user_seq_generator")
     @SequenceGenerator(name = "user_seq_generator", sequenceName = "user_seq_id_seq", allocationSize = 1)
+    @Column(length = 10)
     private Integer id;
 
     @Column(nullable = false, length = 25)
     private String username;
 
-    @Column(unique = true, nullable = false, length = 100)
+    @Column(unique = true, nullable = false, length = 50)
     private String email;
 
     @Column(nullable = false, length = 15)
@@ -50,7 +51,7 @@ public class User implements UserDetails {
     @Column(length = 16)
     private String phoneNumber;
 
-    @Column(length = 200)
+    @Column(length = 100)
     private String address;
 
     @Column(name = "User_Level")
